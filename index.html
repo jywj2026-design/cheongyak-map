@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>부산IN분양권투자 - 특별공급 정밀 배점 계산기</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<style>
+    :root {
+        --primary: #002c5f; /* 부산IN 남색 */
+        --gold: #ffd700;    /* 골드 */
+        --blue: #007bff;    /* 강조 블루 */
+        --bg: #f4f7f6;
+        --red: #E64937;
+    }
+
+    body {
+        font-family: 'Pretendard', sans-serif;
+        background-color: var(--bg);
+        margin: 0;
+        padding: 20px;
+        color: #333;
+        display: flex;
+        justify-content: center;
+        min-height: 100vh;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 600px;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* 상단 헤더 */
+    .header {
+        background: linear-gradient(135deg, var(--primary) 0%, #004085 100%);
+        padding: 30px 20px;
+        text-align: center;
+        color: white;
+    }
+    .header h1 { margin: 0; font-size: 22px; font-weight: 800; color: var(--gold); margin-bottom: 5px; }
+    .header p { margin: 0; font-size: 14px; opacity: 0.8; }
+
+    /* 탭 메뉴 */
+    .tabs {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        background: #e9ecef;
+        padding: 5px;
+        gap: 2px;
+    }
+    .tab-btn {
+        background: white;
+        border: none;
+        padding: 12px 2px;
+        font-size: 13px;
+        font-weight: 700;
+        color: #6c757d;
+        cursor: pointer;
+        transition: all 0.2s;
+        border-radius: 5px;
+    }
+    .tab-btn.active {
+        background: var(--primary);
+        color: white;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    /* 콘텐츠 영역 */
+    .content-box { padding: 25px; display: none; }
+    .content-box.active { display: block; animation: fadeIn 0.3s; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    .section-title {
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--primary);
+        margin-bottom: 15px;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 10px;
+    }
+
+    /* 입력 폼 스타일 */
+    .input-group { margin-bottom: 20px; }
+    .input-label { display: block; font-size: 14px; font-weight: 700; margin-bottom: 8px; color: #495057; }
+    .input-desc { font-size: 12px; color: #868e96; margin-bottom: 8px; display: block; }
+
+    select, input[type="number"] {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        font-size: 15px;
+        font-family: inherit;
+        box-sizing: border-box;
+    }
+    select:focus, input:focus { outline: none; border-color: var(--blue); }
+
+    /* 라디오 버튼 스타일 */
+    .radio-group { display: flex; gap: 10px; }
+    .radio-btn {
+        flex: 1;
+        padding: 12px;
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 14px;
+        cursor: pointer;
+        background: white;
+    }
+    .radio-btn.selected {
+        background: #e7f5ff;
+        border-color: var(--blue);
+        color: var(--blue);
+        font-weight: bold;
+    }
+
+    /* 결과 박스 */
+    .result-area {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 20px;
+        text-align: center;
+        border: 1px solid #e9ecef;
+    }
+    .score-display {
+        font-size: 32px;
+        font-weight: 900;
+        color: var(--primary);
+        margin: 10px 0;
+    }
+    .result-msg { font-size: 14px; color: #555; line-height: 1.5; }
+
+    .btn-calc {
+        width: 100%;
+        padding: 15px;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+    .btn-calc:hover { background: #001f44; }
+
+    @media (max-width: 400px) {
+        .tabs { grid-template-columns: repeat(3, 1fr); }
+        .tab-btn { font-size: 12px; padding: 10px 2px; }
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>특별공급 배점 셀프 진단기</h1>
+        <p>맛있는부동산 제공</p>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="openTab('multi', this)">다자녀</button>
+        <button class="tab-btn" onclick="openTab('newly', this)">신혼부부</button>
+        <button class="tab-btn" onclick="openTab('old', this)">노부모</button>
+        <button class="tab-btn" onclick="openTab('first', this)">생애최초</button>
+        <button class="tab-btn" onclick="openTab('agency', this)">기관추천</button>
+    </div>
+
+    <div id="multi" class="content-box active">
+        <div class="section-title">👨‍👩‍👧‍👦 다자녀 배점 계산 (100점 만점)</div>
+        <div class="input-group">
+            <label class="input-label">미성년 자녀 수 (태아 포함)</label>
+            <span class="input-desc">* 2025년부터 2명도 다자녀 가능!</span>
+            <div class="radio-group">
+                <div class="radio-btn" onclick="setMulti('child', 25, this)">2명<br>(25점)</div>
+                <div class="radio-btn" onclick="setMulti('child', 35, this)">3명<br>(35점)</div>
+                <div class="radio-btn" onclick="setMulti('child', 40, this)">4명↑<br>(40점)</div>
+            </div>
+            <input type="hidden" id="m_child" value="0">
+        </div>
+        <div class="input-group">
+            <label class="input-label">영유아 자녀 수 (만 6세 미만)</label>
+            <select id="m_infant">
+                <option value="0">없음 (0점)</option>
+                <option value="5">1명 (5점)</option>
+                <option value="10">2명 (10점)</option>
+                <option value="15">3명 이상 (15점)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label class="input-label">세대구성</label>
+            <select id="m_family">
+                <option value="0">해당 없음 (0점)</option>
+                <option value="5">3세대 이상 (5점)</option>
+                <option value="5">한부모 가족 (5점)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label class="input-label">무주택 기간 (공고일 기준)</label>
+            <select id="m_nohouse">
+                <option value="0">1년 미만 (0점)</option>
+                <option value="10">1년~5년 (10점)</option>
+                <option value="15">5년~10년 (15점)</option>
+                <option value="20">10년 이상 (20점)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label class="input-label">해당 지역(부산) 거주 기간</label>
+            <select id="m_live">
+                <option value="0">1년 미만 (0점)</option>
+                <option value="5">1년~5년 (5점)</option>
+                <option value="10">5년~10년 (10점)</option>
+                <option value="15">10년 이상 (15점)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label class="input-label">입주자 저축 가입 기간</label>
+            <select id="m_bank">
+                <option value="0">10년 미만 (0점)</option>
+                <option value="5">10년 이상 (5점)</option>
+            </select>
+        </div>
+        <button class="btn-calc" onclick="calcMulti()">내 점수 확인하기</button>
+        <div id="res-multi" class="result-area" style="display:none;">
+            <div>나의 다자녀 가점은?</div>
+            <div class="score-display" id="score-multi">0점</div>
+        </div>
+    </div>
+
+    <div id="newly" class="content-box">
+        <div class="section-title">💍 신혼부부 우선순위 진단</div>
+        <div class="input-group">
+            <label class="input-label">자녀 유무 (혼인 기간 중 출산)</label>
+            <div class="radio-group">
+                <div class="radio-btn" onclick="setNewly('kid', 1, this)">있음 (1순위)</div>
+                <div class="radio-btn" onclick="setNewly('kid', 2, this)">없음 (2순위)</div>
+            </div>
+            <input type="hidden" id="n_kid">
+        </div>
+        <div class="input-group">
+            <label class="input-label">소득 구분 (전년도 도시근로자 기준)</label>
+            <select id="n_income">
+                <option value="priority">외벌이 100% / 맞벌이 120% 이하 (우선공급)</option>
+                <option value="general">외벌이 140% / 맞벌이 160% 이하 (일반공급)</option>
+                <option value="lottery">소득 초과 (부동산 3.31억 이하) (추첨제)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label class="input-label">2세 이하 자녀(신생아)가 있나요?</label>
+            <div class="radio-group">
+                <div class="radio-btn" onclick="setNewly('newborn', 'Y', this)">네 👶</div>
+                <div class="radio-btn" onclick="setNewly('newborn', 'N', this)">아니요</div>
+            </div>
+            <input type="hidden" id="n_newborn">
+        </div>
+        <button class="btn-calc" onclick="calcNewly()">당첨 순위 확인</button>
+        <div id="res-newly" class="result-area" style="display:none;">
+            <div>나의 당첨 순위는?</div>
+            <div class="score-display" id="score-newly" style="font-size:20px;">-</div>
+            <div class="result-msg" id="msg-newly"></div>
+        </div>
+    </div>
+
+    <div id="old" class="content-box">
+        <div class="section-title">👴 노부모부양 가점 계산 (84점)</div>
+        <div class="input-desc" style="color:red;">* 주의: 세대주만 신청 가능, 피부양자 3년 이상 등본 등재 필수</div>
+        <div class="input-group">
+            <label class="input-label">무주택 기간 (만 30세부터 산정)</label>
+            <select id="o_nohouse">
+                <option value="0">1년 미만 (2점)</option>
+                <option value="10">5년~6년 (12점)</option>
+                <option value="20">10년~11년 (22점)</option>
+                <option value="32">15년 이상 (32점 만점)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label class="input-label">부양가족 수 (본인 제외)</label>
+            <select id="o_fam">
+                <option value="5">0명 (5점)</option>
+                <option value="15">2명 (15점)</option>
+                <option value="25">4명 (25점)</option>
+                <option value="35">6명 이상 (35점 만점)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label class="input-label">청약통장 가입 기간</label>
+            <select id="o_bank">
+                <option value="1">6개월 미만 (1점)</option>
+                <option value="7">5년~6년 (7점)</option>
+                <option value="11">9년~10년 (11점)</option>
+                <option value="17">15년 이상 (17점 만점)</option>
+            </select>
+        </div>
+        <button class="btn-calc" onclick="calcOld()">내 점수 확인하기</button>
+        <div id="res-old" class="result-area" style="display:none;">
+            <div>나의 청약 가점은?</div>
+            <div class="score-display" id="score-old">0점</div>
+            <div class="result-msg">노부모 특공은 일반공급 가점표를 따릅니다.</div>
+        </div>
+    </div>
+
+    <div id="first" class="content-box">
+        <div class="section-title">🌱 생애최초 자격/순위 체크</div>
+        <div class="input-desc" style="color:#e64937; font-weight:bold;">* 필수: 현재 무주택세대구성원 + 과거 주택 소유 이력 없음</div>
+        <div class="input-group">
+            <label class="input-label">세대 구성</label>
+            <select id="f_type">
+                <option value="normal">일반 (기혼 또는 미혼 자녀 있음)</option>
+                <option value="single">1인 가구 (미혼, 전용 60㎡ 이하만 가능)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label class="input-label">과거 5년 이상 소득세 납부 내역</label>
+            <div class="radio-group">
+                <div class="radio-btn" onclick="setFirst('tax','Y',this)">있음 (필수)</div>
+                <div class="radio-btn" onclick="setFirst('tax','N',this)">없음</div>
+            </div>
+            <input type="hidden" id="f_tax">
+        </div>
+        <div class="input-group">
+            <label class="input-label">2세 이하 자녀(신생아)가 있나요?</label>
+            <div class="radio-group">
+                <div class="radio-btn" onclick="setFirst('newborn','Y',this)">있음 (신생아 특공)</div>
+                <div class="radio-btn" onclick="setFirst('newborn','N',this)">없음</div>
+            </div>
+            <input type="hidden" id="f_newborn">
+        </div>
+        <div class="input-group">
+            <label class="input-label">소득 요건 (전년도 도시근로자 기준)</label>
+            <select id="f_income">
+                <option value="130">130% 이하 (우선공급)</option>
+                <option value="160">160% 이하 (일반공급)</option>
+                <option value="over">160% 초과 (추첨제 적용)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label class="input-label">부동산 가액 3.31억 이하 여부</label>
+            <div class="radio-group">
+                <div class="radio-btn" onclick="setFirst('asset','Y',this)">충족</div>
+                <div class="radio-btn" onclick="setFirst('asset','N',this)">초과</div>
+            </div>
+            <input type="hidden" id="f_asset">
+        </div>
+        <button class="btn-calc" onclick="calcFirst()">신청 자격 및 단계 확인</button>
+        <div id="res-first" class="result-area" style="display:none;">
+            <div style="font-weight:bold; color:#666; margin-bottom:5px;">진단 결과</div>
+            <div class="score-display" id="score-first" style="font-size:20px; color:var(--blue);"></div>
+            <div class="result-msg" id="msg-first" style="margin-top:10px; font-size:13px; text-align:left; background:#fff; padding:10px; border-radius:5px;"></div>
+        </div>
+    </div>
+
+    <div id="agency" class="content-box">
+        <div class="section-title">🏢 기관추천 체크리스트</div>
+        <div class="input-group" style="background:#f8f9fa; padding:15px; border-radius:10px;">
+            <p style="font-size:14px; margin:0 0 10px 0;"><b>👉 기관추천은 '점수'가 아닙니다.</b></p>
+            <p style="font-size:13px; margin:0; color:#555;">
+                해당 기관(보훈청, 장애인협회, 중기청 등)에서 대상자로 선정되어야만 청약이 가능합니다.<br><br>
+                <b>[주요 대상]</b><br>
+                - 국가유공자 (보훈지청)<br>
+                - 장애인 (지자체 장애인과)<br>
+                - 중소기업 근로자 (지방중소벤처기업청)<br>
+                - 10년 이상 장기복무 군인 (국군복지단)<br><br>
+                * 모집공고일 전에 해당 기관에 미리 신청하여 <b>'추천서'</b>를 받아야 합니다.
+            </p>
+        </div>
+        <button class="btn-calc" style="background:#6c757d;">해당 기관 문의 필요</button>
+    </div>
+</div>
+
+<script>
+    // 탭 전환 함수
+    function openTab(id, btn) {
+        document.querySelectorAll('.content-box').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        btn.classList.add('active');
+    }
+
+    // 라디오 버튼 공통 핸들러
+    function radioSelect(el) {
+        let siblings = el.parentElement.children;
+        for(let sib of siblings) sib.classList.remove('selected');
+        el.classList.add('selected');
+    }
+
+    function setMulti(id, val, el) {
+        document.getElementById('m_' + id).value = val;
+        radioSelect(el);
+    }
+    function setNewly(id, val, el) {
+        document.getElementById('n_' + id).value = val;
+        radioSelect(el);
+    }
+    function setFirst(id, val, el) {
+        document.getElementById('f_' + id).value = val;
+        radioSelect(el);
+    }
+
+    // 1. 다자녀 계산
+    function calcMulti() {
+        let childScore = parseInt(document.getElementById('m_child').value);
+        if(childScore === 0) return alert('자녀 수를 선택해주세요.');
+
+        let total = childScore
+                  + parseInt(document.getElementById('m_infant').value)
+                  + parseInt(document.getElementById('m_family').value)
+                  + parseInt(document.getElementById('m_nohouse').value)
+                  + parseInt(document.getElementById('m_live').value)
+                  + parseInt(document.getElementById('m_bank').value);
+
+        if(total > 100) total = 100;
+        document.getElementById('res-multi').style.display = 'block';
+        document.getElementById('score-multi').innerText = total + "점";
+    }
+
+    // 2. 신혼부부 계산
+    function calcNewly() {
+        let kid = document.getElementById('n_kid').value;
+        let income = document.getElementById('n_income').value;
+        let newborn = document.getElementById('n_newborn').value;
+
+        if (!kid || !newborn) return alert('모든 항목을 선택해주세요.');
+
+        document.getElementById('res-newly').style.display = 'block';
+        let result = "";
+        let desc = "";
+
+        if (newborn === 'Y') {
+            if (income === 'priority') {
+                result = "신생아 우선공급 (1단계)";
+                desc = "소득 100%/120% 이하 구간으로 신생아 최우선 배정 대상입니다.";
+            } else if (income === 'general') {
+                result = "신생아 일반공급 (2단계)";
+                desc = "소득 140%/160% 이하 구간으로 신생아 일반공급 경쟁 대상입니다.";
+            } else {
+                result = "추첨공급 (5단계)";
+                desc = "소득 초과로 신생아 단계 제외, 추첨공급 대상입니다.";
+            }
+        } else {
+            if (income === 'priority') {
+                result = "우선공급 (3단계)";
+                desc = (kid == 1) ? "자녀 있음 1순위 우선공급 경쟁 대상입니다." : "자녀 없음 2순위 우선공급 경쟁 대상입니다.";
+            } else if (income === 'general') {
+                result = "일반공급 (4단계)";
+                desc = (kid == 1) ? "자녀 있음 1순위 일반공급 경쟁 대상입니다." : "자녀 없음 2순위 일반공급 경쟁 대상입니다.";
+            } else {
+                result = "추첨공급 (5단계)";
+                desc = "소득 초과로 추첨공급 물량만 신청 가능합니다.";
+            }
+        }
+        document.getElementById('score-newly').innerText = result;
+        document.getElementById('msg-newly').innerText = desc;
+    }
+
+    // 3. 노부모 계산
+    function calcOld() {
+        let total = parseInt(document.getElementById('o_nohouse').value)
+                  + parseInt(document.getElementById('o_fam').value)
+                  + parseInt(document.getElementById('o_bank').value);
+        document.getElementById('res-old').style.display = 'block';
+        document.getElementById('score-old').innerText = total + "점";
+    }
+
+    // 4. 생애최초 계산
+    function calcFirst() {
+        const type = document.getElementById('f_type').value;
+        const taxOk = document.getElementById('f_tax').value;
+        const newborn = document.getElementById('f_newborn').value;
+        const income = document.getElementById('f_income').value;
+        const assetOk = document.getElementById('f_asset').value;
+
+        if(!taxOk || !newborn || !assetOk) return alert('모든 항목을 선택해주세요.');
+
+        const resDiv = document.getElementById('res-first');
+        const scoreBox = document.getElementById('score-first');
+        const msgBox = document.getElementById('msg-first');
+        resDiv.style.display = 'block';
+
+        if (taxOk === 'N') {
+            scoreBox.innerText = "신청 불가 ❌";
+            scoreBox.style.color = "var(--red)";
+            msgBox.innerText = "생애최초는 과거 5년 이상의 소득세 납부 실적이 필수입니다.";
+            return;
+        }
+
+        if (type === 'single') {
+            if (assetOk === 'N') {
+                scoreBox.innerText = "신청 불가 ❌";
+                scoreBox.style.color = "var(--red)";
+                msgBox.innerText = "1인 가구는 부동산 가액 3.31억 이하 자산 요건을 충족해야 합니다.";
+            } else {
+                scoreBox.innerText = "추첨제 (30% 물량)";
+                scoreBox.style.color = "var(--primary)";
+                msgBox.innerHTML = "• 1인 가구는 소득과 상관없이 추첨제 구간으로 배정됩니다.<br>• 전용면적 60㎡ 이하 주택만 신청 가능합니다.";
+            }
+            return;
+        }
+
+        scoreBox.style.color = "var(--blue)";
+        if (newborn === 'Y') {
+            if (income === '130') {
+                scoreBox.innerText = "신생아 우선공급 (1단계)";
+                msgBox.innerText = "소득 130% 이하 + 신생아 가구로 최상위 자격입니다.";
+            } else if (income === '160') {
+                scoreBox.innerText = "신생아 일반공급 (2단계)";
+                msgBox.innerText = "소득 160% 이하 + 신생아 가구 경쟁 대상입니다.";
+            } else {
+                handleLottery(assetOk, scoreBox, msgBox, "신생아가 있으나 소득 초과로 추첨제로 분류됩니다.");
+            }
+        } else {
+            if (income === '130') {
+                scoreBox.innerText = "우선공급 (3단계)";
+                msgBox.innerText = "소득 130% 이하 일반 생초 자격입니다.";
+            } else if (income === '160') {
+                scoreBox.innerText = "일반공급 (4단계)";
+                msgBox.innerText = "소득 160% 이하 일반 생초 자격입니다.";
+            } else {
+                handleLottery(assetOk, scoreBox, msgBox, "소득 초과로 5단계 추첨제로 분류됩니다.");
+            }
+        }
+    }
+
+    function handleLottery(asset, scoreBox, msgBox, text) {
+        if (asset === 'Y') {
+            scoreBox.innerText = "추첨제 (5단계)";
+            scoreBox.style.color = "var(--primary)";
+            msgBox.innerHTML = `• ${text}<br>• 자산 요건 충족으로 추첨제 경쟁 가능합니다.`;
+        } else {
+            scoreBox.innerText = "신청 불가 ❌";
+            scoreBox.style.color = "var(--red)";
+            msgBox.innerText = "자산 요건(3.31억) 초과로 신청이 불가능합니다.";
+        }
+    }
+</script>
+</body>
+</html>
